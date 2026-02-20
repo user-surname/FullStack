@@ -3,15 +3,15 @@
 </script>
 
 <template>
-    <header classs="header">
+    <header class="header">
         <h1 class="title">Customers page</h1>
             <nav>
                 <ul class="nav-list">
                     <li>
-                        <a class="link" href="/home">Home</a>
+                        <router-link class="link" to="/">Home</router-link>
                     </li>
                     <li>
-                        <a class="link" href="/customers">Customers</a>
+                        <router-link class="link" to="/customers">Customers</router-link>
                     </li>
                 </ul>
             </nav>
