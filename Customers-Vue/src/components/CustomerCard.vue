@@ -73,7 +73,7 @@ const props = defineProps({
     padding: 1.5rem;
     transition: transform 0.2s, box-shadow 0.2s;
     border: 1px solid #f0f0f0;
-    max-width: 400px;
+    max-width: 350px;
 }
 .customer-card:hover {
     transform: translateY(-4px);

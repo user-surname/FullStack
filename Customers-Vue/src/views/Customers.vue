@@ -3,6 +3,7 @@ import { onMounted } from 'vue';
 import CustomerCard from '../components/CustomerCard.vue';
 import HeaderComponent from '../components/HeaderComponent.vue';
 import { useCustomerStore } from '../stores/customers';
+import CustomerForm from '../components/CustomerForm.vue';
 
 const customerStore  = useCustomerStore();
 
@@ -15,8 +16,9 @@ onMounted(async() => {
 
 <template>
     <HeaderComponent />
-    <section id="customers-page">
     <h2>Customers Page</h2> 
+        <section id="customers-page">
+            <CustomerForm />
     <h2 v-if="customerStore.loading">Carregant</h2>
     <h2 v-else-if ="customerStore.error">Error al carregar les dades</h2>
     <ul v-else class="customer-list">
@@ -37,7 +39,7 @@ onMounted(async() => {
     gap: 1.5rem;
 }
 #customers-page {
-    padding: 20px;
+    padding: 2rem;
 }
 .customer-list li {
     padding: 10px;

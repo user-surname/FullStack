@@ -23,11 +23,28 @@ export const useCustomerStore = defineStore("customers", () => {
         }
     }
 
+    const addCustomer = async (newCustomer) => {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(newCustomer)
+        });
+        if (response.ok) {
+            const data = await response.json();
+            customers.value.push(data);
+            getCustomers(); // Actualitza la llista de clients després d'afegir-ne un de nou
+        }
+
+    }
+
     return {
         customers, 
         loading,
         error,
         getCustomers,
+        addCustomer
     }
 
 });
