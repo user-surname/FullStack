@@ -1,48 +1,193 @@
 import { defineStore } from "pinia"
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 export const useConflictsStore = defineStore("conflicts", () => {
     const API_URL = "http://localhost:8080/conflicts";
+    const COUNTRIES_URL = "http://localhost:8080/countries";
+    const FACTIONS_URL = "http://localhost:8080/factions";
+    const EVENTS_URL = "http://localhost:8080/events";
 
     const conflicts = ref([]);
+    const countries = ref([]);
+    const factions = ref([]);
+    const events = ref([]);
     const loading = ref(false);
-    const error = ref(false);
+    const error = ref("");
+    const selectedStatus = ref("ALL");
+    const searchTerm = ref("");
 
     const getConflicts = async () => {
         loading.value = true;
+        error.value = "";
         try {
             const response = await fetch(API_URL);
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
             const data = await response.json();
             conflicts.value = data;
-            error.value = false;
         } catch (err) {
-            error.value = true;
+            error.value = "No s'han pogut carregar els conflictes.";
             console.error("Error fetching conflicts:", err);
         } finally {
             loading.value = false;
         }
     }
 
+    const getConflictById = async (id) => {
+        loading.value = true;
+        error.value = "";
+        try {
+            const response = await fetch(`${API_URL}/${id}`);
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+            return await response.json();
+        } catch (err) {
+            error.value = `No s'ha pogut carregar el conflicte ${id}.`;
+            console.error("Error fetching conflict by id:", err);
+            return null;
+        } finally {
+            loading.value = false;
+        }
+    };
+
     const addConflict = async (newConflict) => {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(newConflict)
-        });
-        if (response.ok) {
+        error.value = "";
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(newConflict)
+            });
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
             const data = await response.json();
             conflicts.value.push(data);
-            getConflicts();
+            return true;
+        } catch (err) {
+            error.value = "No s'ha pogut crear el conflicte.";
+            console.error("Error creating conflict:", err);
+            return false;
         }
-    }
+    };
+
+    const updateConflict = async (id, conflictData) => {
+        error.value = "";
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(conflictData)
+            });
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+            const data = await response.json();
+            conflicts.value = conflicts.value.map(conflict =>
+                conflict.id === id ? data : conflict
+            );
+            return data;
+        } catch (err) {
+            error.value = `No s'ha pogut actualitzar el conflicte ${id}.`;
+            console.error("Error updating conflict:", err);
+            return null;
+        }
+    };
+
+    const getCountries = async () => {
+        try {
+            const response = await fetch(COUNTRIES_URL);
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+            countries.value = await response.json();
+        } catch (err) {
+            console.error("Error fetching countries:", err);
+        }
+    };
+
+    const getFactions = async () => {
+        try {
+            const response = await fetch(FACTIONS_URL);
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+            factions.value = await response.json();
+        } catch (err) {
+            console.error("Error fetching factions:", err);
+        }
+    };
+
+    const getEvents = async () => {
+        try {
+            const response = await fetch(EVENTS_URL);
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+            events.value = await response.json();
+        } catch (err) {
+            console.error("Error fetching events:", err);
+        }
+    };
+
+    const removeConflict = async (id) => {
+        error.value = "";
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: "DELETE"
+            });
+            if (!response.ok) {
+                throw new Error(`Request failed with status ${response.status}`);
+            }
+            conflicts.value = conflicts.value.filter(conflict => conflict.id !== id);
+            return true;
+        } catch (err) {
+            error.value = `No s'ha pogut eliminar el conflicte ${id}.`;
+            console.error("Error deleting conflict:", err);
+            return false;
+        }
+    };
+
+    const activeConflictsCount = computed(() =>
+        conflicts.value.filter(conflict => conflict.status === "ACTIVE").length
+    );
+
+    const filteredConflicts = computed(() => {
+        const normalizedSearch = searchTerm.value.trim().toLowerCase();
+        return conflicts.value.filter(conflict => {
+            const matchesStatus =
+                selectedStatus.value === "ALL" || conflict.status === selectedStatus.value;
+            const matchesSearch =
+                conflict.name?.toLowerCase().includes(normalizedSearch) ||
+                conflict.description?.toLowerCase().includes(normalizedSearch);
+            return matchesStatus && matchesSearch;
+        });
+    });
 
     return {
         conflicts,
+        countries,
+        factions,
+        events,
         loading,
         error,
+        selectedStatus,
+        searchTerm,
+        filteredConflicts,
+        activeConflictsCount,
         getConflicts,
-        addConflict
+        getConflictById,
+        addConflict,
+        updateConflict,
+        getCountries,
+        getFactions,
+        getEvents,
+        removeConflict
     }
 })
