@@ -2,10 +2,10 @@ import { defineStore } from "pinia"
 import { computed, ref } from "vue";
 
 export const useConflictsStore = defineStore("conflicts", () => {
-    const API_URL = "http://localhost:8080/conflicts";
-    const COUNTRIES_URL = "http://localhost:8080/countries";
-    const FACTIONS_URL = "http://localhost:8080/factions";
-    const EVENTS_URL = "http://localhost:8080/events";
+    const API_URL = "https://conflict-tracker-production-8ce4.up.railway.app/conflicts";
+    const COUNTRIES_URL = "https://conflict-tracker-production-8ce4.up.railway.app/countries";
+    const FACTIONS_URL = "https://conflict-tracker-production-8ce4.up.railway.app/factions";
+    const EVENTS_URL = "https://conflict-tracker-production-8ce4.up.railway.app/events";
 
     const conflicts = ref([]);
     const countries = ref([]);
